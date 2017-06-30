@@ -1,0 +1,23 @@
+---
+- name: Transfer and execute a script.
+  hosts: host
+  become: yes
+  tasks:
+      - name: install basic packages
+        action: >
+          {{ ansible_pkg_mgr }} name={{ item }} state=present update_cache=yes
+        with_items:
+          - nethogs
+          - iptraf-ng
+      - name: Copy and Execute the script
+        script: /root/final2.sh
+        register: result
+        ignore_errors: yes
+#        args:
+ #        executable: /bin/bash
+      - name: clear ssh.log
+        local_action: shell > /root/ssh.log
+      - name: Show output
+        debug: msg="{{result.stdout_lines}}"
+      - name: store output
+        local_action: lineinfile line="{{result.stdout_lines}}" path="/root/ssh.log"
